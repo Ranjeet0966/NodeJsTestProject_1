@@ -1,0 +1,122 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Awesome To-Do List HTML, CSS & JavaScript</title>
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+	<div class="container">
+		<div class="addTask">
+            <label for="task">Todo Name:</label>
+			<input type="text" id="task" placeholder="Add a Task">
+            <label for="description">Description:</label>
+            <input type="text" id="description" placeholder="Description">
+			<button>Add</button>
+		</div>
+
+		<div class="taskLists">
+			<div class="notCompleted">
+				<h3>Not Completed</h3>
+				<ol class="notCompletedList"></ol>
+			</div>
+
+			<div class="completed">
+				<h3>Todos Done</h3>
+				<ol class="completedList"></ol>
+			</div>
+		</div>
+	</div>
+
+</section> <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>  
+
+</body>
+</html>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+</head>
+<body>
+    <h2>Todo List</h2>
+    <form onsubmit="addTodo(event)">
+        <label>Todo Name</label>
+        <input type="text" id="id1" name="todoname" required>
+        <label>Description</label>
+        <input type="text" id="id2" name="description">
+        <button>Add Todo</button>
+    </form>
+    <ul id="listoftodos"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        function addTodo(event) {
+            event.preventDefault();
+            const todoName = event.target.todoname.value;
+            const description = event.target.description.value;
+            const obj = {
+                todoName,
+                description
+            };
+            axios.post("http://localhost:5000/todo/add-todo", obj)
+                .then((response) => {
+                    console.log(response);
+                    showNewTodoOnScreen(response.data);
+                })
+                .catch((err) => {
+                    document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>";
+                    console.error(err);
+                });
+            // Clear the form inputs after adding the todo
+            event.target.todoname.value = '';
+            event.target.description.value = '';
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            axios.get("http://localhost:5000/todo/get-todos")
+                .then((response) => {
+                    console.log(response);
+                    response.data.forEach((todo) => {
+                        showNewTodoOnScreen(todo);
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        });
+
+        function showNewTodoOnScreen(todo) {
+            const parentnode = document.getElementById('listoftodos');
+            const childnode = `<li id=${todo.id}> ${todo.todoName}, ${todo.description}
+                                <button onclick=deleteTodo('${todo.id}')> Delete Todo </button>
+                                <button onclick=editTodo('${todo.description}','${todo.todoName}','${todo.id}')> Edit Todo </button></li>`;
+            parentnode.innerHTML = parentnode.innerHTML + childnode;
+        }
+
+        function editTodo(description, todoName, todoId) {
+            document.getElementById('id2').value = description;
+            document.getElementById('id1').value = todoName;
+            deleteTodo(todoId);
+        }
+
+        function deleteTodo(todoId) {
+            axios.delete(`http://localhost:5000/todo/delete-todo/${todoId}`)
+                .then((response) => {
+                    removeTodoFromScreen(todoId);
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        }
+
+        function removeTodoFromScreen(todoId) {
+            const parentnode = document.getElementById('listoftodos');
+            const childnodeIsDeleted = document.getElementById(todoId);
+            parentnode.removeChild(childnodeIsDeleted);
+        }
+    </script>
+</body>
+</html>
