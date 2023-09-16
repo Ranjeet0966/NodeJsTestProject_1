@@ -12,10 +12,10 @@ exports.postAddTodo = async (req, res, next) => {
       description: description,
     });
 
-    res.json(todo); // Sending the created todo as a response
+    res.json(todo); 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Internal Server Error" }); // Handle errors and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" }); 
   }
 };
 
